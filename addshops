@@ -1,0 +1,59 @@
+const AWS= require("aws-sdk");
+var documentClient = new AWS.DynamoDB.DocumentClient();
+exports.handler =  (event,context,callback) => {
+    
+    
+    var param={
+        Key:{
+            GSTNO:event.gst
+        },
+        TableName:"GST"
+    };
+    documentClient.get(param,(err,data)=>{
+       if(err)
+       {
+           callback(err);
+       }
+       else
+       {
+           console.log("Success NO ERROR");
+           if(data.Item!=null)
+           {
+            console.log("This is already exist");
+              callback(null,{"log":"Alreday Exist"});   
+           }
+           else
+          {
+              console.log("NO shop exist");
+                var params = {
+                TableName : 'GST',
+                 Item: {
+                     GSTNO: event.gst,
+                     userId: event.userid,
+                     Ratinginfo:[
+                                 {
+                                     "userId":event.userid,
+                                     "rating":event.rating
+                                 }
+                                ]
+                         }
+                    };
+                documentClient.put(params, function(err, data1) {
+                          if (err) 
+                          {
+                              console.log(err);
+                              callback(err);
+                              
+                          }
+                          else
+                          {
+                              console.log(data1);
+                              callback(null,{"log":"Data added Successfully"});
+                          }
+                    });
+          }
+        
+           
+       }
+    });
+};
