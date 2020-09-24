@@ -1,0 +1,250 @@
+const Aws= require("aws-sdk");
+const documentClient= new Aws.DynamoDB.DocumentClient();
+exports.handler = (event,context,callback) => {
+    
+    var r;
+      const params = {
+        Key:{
+          GSTNO:event.gst,
+        },
+        TableName:"GST"
+    };
+    documentClient.get(params,function(err,data){
+        if(err)
+        {
+            console.log(err);
+            callback(err);
+        }
+        else
+        {
+               r=data.Item.Ratinginfo;
+               console.log(r);
+               if(event.type=="newRating")
+               {
+                   r.push({"rating":event.rating,"userId":event.userid});
+                             var param={
+                                         Key:{
+                                         GSTNO:event.gst,
+                                            },
+                                     UpdateExpression: " set #uname=:uratinginfo  ",
+                                     ExpressionAttributeNames:{
+                                        "#uname":"Ratinginfo"
+                                                            },
+                                     ExpressionAttributeValues: {
+                                              ":uratinginfo":r
+                                        },
+                                    ReturnValues: "ALL_NEW", 
+                                    TableName:"GST"
+                                     };
+    
+                                documentClient.update(param,(err,data)=>{
+                                    if(err)
+                                    {
+                                        callback(err);
+                                    }
+                                    else
+                                    {
+                                        console.log("Rating Added Successfully");
+                                        callback(null,data);
+                                    }
+                                });
+               }
+               else if(event.type=="update")
+               { 
+                    //   r.forEach((im)=>{
+                          
+                    //       if(im.userId=="user1")
+                    //       {
+                    //           im.rating=event.newrating;
+                              
+                    //       }
+                         
+                    //   });
+                      const index = r.findIndex(x => x.userId == event.userid);
+                      console.log(index);
+                      r[index].rating=event.rating;
+                           var param1={
+                                         Key:{
+                                         GSTNO:event.gst,
+                                            },
+                                     UpdateExpression: " set #uname=:uratinginfo  ",
+                                     ExpressionAttributeNames:{
+                                        "#uname":"Ratinginfo"
+                                                            },
+                                     ExpressionAttributeValues: {
+                                              ":uratinginfo":r
+                                        },
+                                     ReturnValues: "ALL_NEW", 
+                                    TableName:"GST"
+                                     };
+    
+                                documentClient.update(param1,(err,data)=>{
+                                    if(err)
+                                    {
+                                        callback(err);
+                                    }
+                                    else
+                                    {
+                                        callback(null,data);
+                                    }
+                                });
+                     
+         
+                }
+        }
+ });
+};
+
+
+
+
+
+// const Aws= require("aws-sdk");
+// const dynamodb= new Aws.DynamoDB.DocumentClient();
+// // new Aws.DynamoDB({region:"ap-south-1",apiVersion: '2012-08-10'});
+// exports.handler =  (event,context,callback) => {
+    
+//     // const params={
+ 
+//     //     KeyConditionExpression: "#gst = :ugst ",
+//     // ExpressionAttributeNames:{
+//     //     "#gst": "gstno",
+//     //     // "#uname":"user"
+//     // },
+//     // ExpressionAttributeValues: {
+//     //      ":ugst": "ankit",
+//     //     //  ":uvalue":"abc"
+//     // },
+//     //  ProjectionExpression:"#gst,rating,ids",
+//     //     TableName:"Mydata"
+//     // };
+    
+//     // dynamodb.query(params,(err,data)=>{
+//     //     if(err)
+//     //     {
+//     //         callback(err);
+//     //     }
+//     //     else
+//     //     {
+//     //         callback(null,data);
+//     //     }
+//     // });
+//     // var tot=0;
+//     // var params = {
+//     // ExpressionAttributeNames:{
+//     //     "#user": "user",
+//     //     // "#uname":"user"
+//     // },
+//     // ExpressionAttributeValues: {
+//     //      ":ugst": "abc",
+//     //     //  ":uvalue":"abc"
+//     // },
+//     // FilterExpression:"#user=:ugst",
+//     //  ProjectionExpression:"gstno,rating,ids,#user",
+//     //     TableName:"Mydata"
+//     // };
+//     // dynamodb.scan(params,(err,data)=>{
+//     //     if(err)
+//     //     callback(err);
+//     //     else
+//     //     {
+//     //         data.Items.forEach((sum)=>{tot+=sum.rating});
+//     //     callback(null,data);
+//     //     }
+//     // });
+    
+//     // var r;
+//     // console.log("dynamoarray");
+//     // const params = {
+//     //     Key:{
+//     //       gstno:"xyz",
+//     //       user:"id"
+//     //     },
+//     //     TableName:"Mydata"
+//     // };
+//     // dynamodb.get(params,function(err,data){
+        
+//     //     if(err)
+//     //     {
+//     //         console.log(err);
+//     //         callback(err);
+//     //     }
+//     //     else
+//     //     {
+//     //         console.log("successful");
+//     //       r=data.Item.ratinginfo;
+//     //       console.log(r);
+//     //       r.forEach((im)=>{
+//     //           if(im.userid=="id2")
+//     //           {
+//     //               im.rating=7;
+                  
+//     //           }
+               
+//     //       });
+//     //       r.push({"rating":3,"userid":"id4"});
+//     //       var param={
+//     //           Key:{
+//     //       gstno:"xyz",
+//     //       user:"id"
+//     //     },
+//     //           UpdateExpression: " set #uname=:uratinginfo  ",
+//     // ExpressionAttributeNames:{
+
+//     //     "#uname":"ratinginfo"
+//     // },
+//     // ExpressionAttributeValues: {
+//     //       ":uratinginfo":r
+//     // },
+//     //  ProjectionExpression:"gstno",
+//      //ReturnValues: "ALL_NEW", 
+//     //     TableName:"Mydata"
+//     // };
+    
+//     // dynamodb.update(param,(err,data)=>{
+//     //     if(err)
+//     //     {
+//     //         callback(err);
+//     //     }
+//     //     else
+//     //     {
+//     //         callback(null,data);
+//     //     }
+//     // });
+           
+//     //     }
+//         // });
+// //                 r=data.Item.saa;
+// //                  r.push({"id":"gst","ratings":5});
+// //                   const param={
+// //   ExpressionAttributeNames: {
+// //   "#AT": "saa", 
+// //   }, 
+// //   ExpressionAttributeValues: {
+// //   ":t":r
+// //   }, 
+// //   Key: {
+// //   UserId:"ankit"
+// //   }, 
+// //   ReturnValues: "ALL_NEW", 
+// //   UpdateExpression: "SET #AT = :t",
+// //   TableName:"Shop"
+// //     };
+// //     dynamodb.update(param,function(err,data)
+// //     {
+// //         if(err)
+// //         {
+// //             console.log(err);
+// //             callback(err);
+// //         }
+// //         else
+// //         {
+// //             console.log("successful");
+// //             callback(null,data);
+// //         }
+// //     });
+// // // callback(null,r);
+            
+// //         }
+// //     });
+// };
