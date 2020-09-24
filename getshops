@@ -1,0 +1,58 @@
+const Aws= require("aws-sdk");
+const documentClient= new Aws.DynamoDB.DocumentClient();
+exports.handler = (event,context,callback) => {
+    if(event.gettype=="all")
+    {
+        const params={
+           TableName:"GST",
+        };
+        documentClient.scan(params,(err,data)=>{
+           if(err)
+           {
+               console.log(err);
+               callback(err);
+           }
+           else
+           {
+               console.log(data);
+               callback(null,data);
+           }
+        });
+    }
+    else {
+         const params={
+             Key:{
+                 GSTNO:event.gettype
+             },
+           TableName:"GST",
+        };
+        documentClient.get(params,(err,data)=>{
+            if(err)
+           {
+               console.log(err);
+               callback(err);
+           }
+           else
+           {
+               console.log(data);
+               callback(null,data);
+           }
+        });
+    }
+    
+};
+
+
+// var params = {
+//     ExpressionAttributeNames:{
+//         "#user": "user",
+//         // "#uname":"user"
+//     },
+//     ExpressionAttributeValues: {
+//          ":ugst": "abc",
+//         //  ":uvalue":"abc"
+//     },
+//     FilterExpression:"#user=:ugst",
+//      ProjectionExpression:"gstno,rating,ids,#user",
+//         TableName:"Mydata"
+//     };
